@@ -1,10 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { TidbitResponse, TidbitCategory } from "../types";
 
-// Initialize Gemini Client
-// NOTE: The API key is injected via process.env.API_KEY automatically.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const SYSTEM_INSTRUCTION = `
 You are a world-class senior software engineer and technical educator. 
 Your task is to generate high-quality, educational "tidbits" of software engineering knowledge for a Gachapon (capsule toy) machine.
@@ -24,8 +20,18 @@ Structure of the response:
    - Format the code properly based on the languages.
 `;
 
+const getApiKey = () => {
+  return localStorage.getItem('gemini_api_key') || process.env.API_KEY;
+};
+
 export const fetchRandomTidbit = async (category: string): Promise<TidbitResponse> => {
   try {
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      throw new Error("Missing API Key");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     const model = 'gemini-2.5-flash';
 
     let prompt = "Generate one random software engineering tidbit with advanced explanation and code.";
@@ -65,8 +71,19 @@ export const fetchRandomTidbit = async (category: string): Promise<TidbitRespons
 
     return data;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+
+    if (error.message === "Missing API Key") {
+      return {
+        title: "請設定 API Key",
+        content: "尚未設定 Google Gemini API Key。",
+        explanation: "請點擊右上角的設定按鈕，輸入您的 API Key 以開始使用。",
+        code: "",
+        category: "系統訊息"
+      };
+    }
+
     // Fallback content in case of error
     return {
       title: "API 休息中",

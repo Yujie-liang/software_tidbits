@@ -33,12 +33,21 @@ Users spin a virtual "Gachapon" machine to receive random "knowledge capsules" (
     ```bash
     npm install
     ```
-3.  **Set up Environment Variables**:
+3.  **Set up Environment Variables (Optional)**:
     Create a `.env.local` file and add your Gemini API key:
     ```env
     VITE_GEMINI_API_KEY=your_api_key_here
     ```
+    *Alternatively, you can configure the API key directly in the application UI.*
+
 4.  **Run the development server**:
     ```bash
     npm run dev
     ```
+
+## API Key Configuration
+
+You can configure your Google Gemini API key in two ways:
+
+1.  **Environment Variable**: Set `VITE_GEMINI_API_KEY` in your `.env.local` file. This is recommended for local development.
+2.  **UI Configuration**: Click the **Settings** (gear icon) in the top-right corner of the application to enter your API key manually. The key is stored securely in your browser's LocalStorage. This is useful for deployed versions where you cannot set environment variables.

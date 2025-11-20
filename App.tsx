@@ -2,9 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { GachaponMachine } from './components/GachaponMachine';
 import { PrizeModal } from './components/PrizeModal';
 import { StatsChart } from './components/StatsChart';
+import { ApiKeyModal } from './components/ApiKeyModal';
 import { fetchRandomTidbit } from './services/geminiService';
 import { Tidbit, TidbitCategory } from './types';
-import { History, RotateCcw, Filter } from 'lucide-react';
+import { History, RotateCcw, Settings } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const CAPSULE_COLORS = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
@@ -15,6 +16,7 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentTidbit, setCurrentTidbit] = useState<Tidbit | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [history, setHistory] = useState<Tidbit[]>([]);
   const [activeTab, setActiveTab] = useState<'machine' | 'collection'>('machine');
   const [selectedCategory, setSelectedCategory] = useState<string>(TidbitCategory.ALL);
@@ -40,7 +42,7 @@ function App() {
 
       setCurrentTidbit(newTidbit);
       setHistory(prev => [newTidbit, ...prev]);
-      
+
       // Small delay to let the ball "land" before opening
       setTimeout(() => {
         setIsModalOpen(true);
@@ -55,7 +57,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-800">
-      
+
       {/* Navbar */}
       <nav className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -67,29 +69,36 @@ function App() {
               Gacha Dev
             </h1>
           </div>
-          
+
           <div className="flex gap-4">
-             <button 
-               onClick={() => setActiveTab('machine')}
-               className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${activeTab === 'machine' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-slate-500 hover:bg-slate-100'}`}
-             >
-               <RotateCcw size={18} />
-               <span className="hidden sm:inline">扭蛋機</span>
-             </button>
-             <button 
-               onClick={() => setActiveTab('collection')}
-               className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${activeTab === 'collection' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-slate-500 hover:bg-slate-100'}`}
-             >
-               <History size={18} />
-               <span className="hidden sm:inline">收藏 ({history.length})</span>
-             </button>
+            <button
+              onClick={() => setActiveTab('machine')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${activeTab === 'machine' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              <RotateCcw size={18} />
+              <span className="hidden sm:inline">扭蛋機</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('collection')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${activeTab === 'collection' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              <History size={18} />
+              <span className="hidden sm:inline">收藏 ({history.length})</span>
+            </button>
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-slate-500 hover:bg-slate-100 transition-all"
+              title="設定 API Key"
+            >
+              <Settings size={18} />
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 py-8">
-        
+
         {activeTab === 'machine' ? (
           <div className="flex flex-col items-center animate-fadeIn">
             <div className="text-center mb-6 max-w-xl mx-auto">
@@ -106,8 +115,8 @@ function App() {
                     onClick={() => !isProcessing && setSelectedCategory(cat)}
                     disabled={isProcessing}
                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all transform hover:scale-105 active:scale-95
-                      ${selectedCategory === cat 
-                        ? 'bg-indigo-600 text-white shadow-md' 
+                      ${selectedCategory === cat
+                        ? 'bg-indigo-600 text-white shadow-md'
                         : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                       } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -118,9 +127,9 @@ function App() {
             </div>
 
             <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-              <GachaponMachine 
-                onSpin={handleSpin} 
-                isProcessing={isProcessing} 
+              <GachaponMachine
+                onSpin={handleSpin}
+                isProcessing={isProcessing}
                 label={selectedCategory === TidbitCategory.ALL ? "ENGINEERING" : selectedCategory}
               />
             </div>
@@ -129,12 +138,12 @@ function App() {
             {history.length > 0 && (
               <div className="mt-12 w-full max-w-md">
                 <div className="flex items-center justify-between mb-4">
-                   <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">最近獲得</h3>
-                   <button onClick={() => setActiveTab('collection')} className="text-indigo-500 text-sm hover:underline">查看全部</button>
+                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">最近獲得</h3>
+                  <button onClick={() => setActiveTab('collection')} className="text-indigo-500 text-sm hover:underline">查看全部</button>
                 </div>
                 <div className="space-y-3">
                   {history.slice(0, 3).map(item => (
-                    <div key={item.id} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3 group hover:border-indigo-200 transition-colors cursor-pointer" onClick={() => {setCurrentTidbit(item); setIsModalOpen(true);}}>
+                    <div key={item.id} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3 group hover:border-indigo-200 transition-colors cursor-pointer" onClick={() => { setCurrentTidbit(item); setIsModalOpen(true); }}>
                       <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <div className="flex-1 truncate">
                         <p className="font-medium text-slate-700 truncate group-hover:text-indigo-600">{item.title}</p>
@@ -148,7 +157,7 @@ function App() {
           </div>
         ) : (
           <div className="animate-fadeIn space-y-8">
-            
+
             {/* Collection Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
@@ -160,7 +169,7 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Chart Section */}
               <div className="md:col-span-1">
-                 <StatsChart history={history} />
+                <StatsChart history={history} />
               </div>
 
               {/* List Section */}
@@ -174,9 +183,9 @@ function App() {
                   </div>
                 ) : (
                   history.map((item) => (
-                    <div 
-                      key={item.id} 
-                      onClick={() => {setCurrentTidbit(item); setIsModalOpen(true);}}
+                    <div
+                      key={item.id}
+                      onClick={() => { setCurrentTidbit(item); setIsModalOpen(true); }}
                       className="group bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex flex-col cursor-pointer"
                     >
                       <div className="flex items-center justify-between mb-3">
@@ -192,8 +201,8 @@ function App() {
                         {item.content}
                       </p>
                       <div className="text-[10px] text-slate-400 text-right border-t pt-2 border-slate-50 flex justify-between items-center">
-                         <span className="text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">點擊查看詳解</span>
-                         <span>{new Date(item.timestamp).toLocaleDateString()}</span>
+                        <span className="text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">點擊查看詳解</span>
+                        <span>{new Date(item.timestamp).toLocaleDateString()}</span>
                       </div>
                     </div>
                   ))
@@ -209,12 +218,17 @@ function App() {
         <p>Built with React, Tailwind, and Gemini 2.5 Flash</p>
       </footer>
 
-      <PrizeModal 
-        tidbit={currentTidbit} 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <PrizeModal
+        tidbit={currentTidbit}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
-      
+
+      <ApiKeyModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+
     </div>
   );
 }
